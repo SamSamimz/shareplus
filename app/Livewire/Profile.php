@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Post;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -78,6 +79,71 @@ class Profile extends Component
         $this->closeProfileEditModal();
     }
 
+    public function savePost(Post $post) {
+        $userSavePost = request()->user()->savedPosts()->where('post_id',$post->id)->first();
+        if($userSavePost) {
+            $userSavePost->delete();
+        }else {
+            request()->user()->savedPosts()->create(['post_id' => $post->id]);
+        }
+    }
+
+    public function saved(Post $post) :bool{
+        if(request()->user()->savedPosts()->where('post_id',$post->id)->exists()) {
+            return true;
+        }
+        return false;
+    }
+
+    public function likePost(Post $post) {
+        if(!$this->likedBy($post)) {
+            $post->likes()->create(['user_id' => request()->user()->id]);
+        }else {
+            $like = $post->likes()->where('user_id',request()->user()->id)->first();
+            $like->delete();
+        }
+    }
+
+    public function likedBy(Post $post) {
+        if($post->likes()->where('user_id',request()->user()->id)->exists()) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function getFeeling($val) {
+        switch ($val) {
+            case 'happy':
+                return "is feeling happy😀";
+                break;
+            
+            case 'sad':
+                return "is feeling sad😥";
+                break;
+            
+            case 'angry':
+                return "is feeling angry😡";
+                break;
+            
+            case 'thankfull':
+                return "is feeling thankfull🙏";
+                break;
+            case 'blessed':
+                return "is feeling blessed😊";
+                break;
+            case 'excited':
+                return "is feeling excited😉";
+                break;
+            
+            default:
+                return null;
+                break;
+        }
+    }
+
+
+
     public function closeProfileEditModal() {
         $this->dispatch('closeProfileEditModal');
     }
@@ -93,6 +159,7 @@ class Profile extends Component
 
     public function render()
     {
-        return view('livewire.profile')->layout('layouts.app');
+        $posts = $this->user->posts;
+        return view('livewire.profile',compact('posts'))->layout('layouts.app');
     }
 }
