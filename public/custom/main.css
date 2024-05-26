@@ -1,0 +1,71 @@
+.ionic-logo {
+    width: 20px;
+    height: 20px;
+}
+
+#spinner-box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(231, 225, 225);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+#spinner-box.loaded {
+    display: none;
+}
+
+#cooking_btn {
+    width: 630px;
+    height: 200px;
+    background: #fff;
+}
+
+#cooking_btn img {
+    width: 100%;
+    height: 80%;
+}
+
+.post-image {
+    width: 100%;
+    height: 400px;
+}
+.author-image {
+    width: 53px;
+    height: 53px;
+    border-radius: 50%;
+}
+
+.author-name {
+    text-decoration: none;
+    color: black;
+    font-size: 17px;
+}
+
+.feeling-text {
+    font-size: 14px;
+    font-style: italic;
+}
+
+.max-h-300 {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.btn-transparent {
+    text-decoration: none;
+    color: black;
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px 10px;
+}
+
+.comment-author-img {
+    height: 35px;
+    width: 35px;
+    border-radius: 50%;
+}
