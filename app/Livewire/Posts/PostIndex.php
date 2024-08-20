@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\SavedPost;
 use Livewire\Component;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
 use Livewire\WithFileUploads;
 
 class PostIndex extends Component
@@ -88,15 +89,15 @@ class PostIndex extends Component
             case 'happy':
                 return "is feeling happy😀";
                 break;
-            
+
             case 'sad':
                 return "is feeling sad😥";
                 break;
-            
+
             case 'angry':
                 return "is feeling angry😡";
                 break;
-            
+
             case 'thankfull':
                 return "is feeling thankfull🙏";
                 break;
@@ -106,17 +107,21 @@ class PostIndex extends Component
             case 'excited':
                 return "is feeling excited😉";
                 break;
-            
+
             default:
                 return null;
                 break;
         }
     }
 
+    #[Computed]
+    public function posts() {
+        return Post::with('likes','comments','user')->latest()->get();
+    }
 
     public function render()
     {
-        $posts = Post::latest()->get();
+        $posts = $this->posts;
         return view('livewire.posts.post-index',compact('posts'));
     }
 }

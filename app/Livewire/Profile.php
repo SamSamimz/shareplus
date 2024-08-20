@@ -25,10 +25,9 @@ class Profile extends Component
     public $email;
     public $user;
 
-
     public function mount($username) {
         $this->username = $username;
-        $this->user = User::where('username',$this->username)->first();
+        $this->user = User::with('profile')->where('username',$this->username)->first();
         if(!$this->user) {
             abort(404);
         }
@@ -80,7 +79,7 @@ class Profile extends Component
     }
 
     public function savePost(Post $post) {
-        $userSavePost = request()->user()->savedPosts()->where('post_id',$post->id)->first();
+        $userSavePost = $this->user->savedPosts()->where('post_id',$post->id)->first();
         if($userSavePost) {
             $userSavePost->delete();
         }else {
@@ -97,9 +96,9 @@ class Profile extends Component
 
     public function likePost(Post $post) {
         if(!$this->likedBy($post)) {
-            $post->likes()->create(['user_id' => request()->user()->id]);
+            $post->likes()->create(['user_id' => $this->user->id]);
         }else {
-            $like = $post->likes()->where('user_id',request()->user()->id)->first();
+            $like = $post->likes()->where('user_id',$this->user->id)->first();
             $like->delete();
         }
     }
@@ -117,15 +116,15 @@ class Profile extends Component
             case 'happy':
                 return "is feeling happy😀";
                 break;
-            
+
             case 'sad':
                 return "is feeling sad😥";
                 break;
-            
+
             case 'angry':
                 return "is feeling angry😡";
                 break;
-            
+
             case 'thankfull':
                 return "is feeling thankfull🙏";
                 break;
@@ -135,7 +134,7 @@ class Profile extends Component
             case 'excited':
                 return "is feeling excited😉";
                 break;
-            
+
             default:
                 return null;
                 break;
