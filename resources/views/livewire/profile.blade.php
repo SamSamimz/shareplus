@@ -61,7 +61,7 @@
                               </a>
                               <div>
                                 <h6><a class="author-name" href="{{route('profile.show',$post->user->username)}}" wire:navigate >{{$post->user->name}}</a> @if ($post->feeling)
-                                  <span class="feeling-text">{{$this->getFeeling($post->feeling)}}</span>
+                                  <span class="feeling-text">{{$this->showFeeling($post->feeling)}}</span>
                                 @endif </h6>
                                 <div class="text-secondary">{{$post->created_at->diffForHumans()}}</div>
                               </div>
@@ -123,7 +123,7 @@
             <div>
                 <div class="d-flex align-items-center justify-content-between">
                     <h6 class="fs-5">Profile</h6>
-                    <button wire:click='openProfileEditModal()' data-bs-dismiss="modal" class="btn text-primary">Edit</button>
+                    <button wire:click.prevent="$dispatch('openProfileEditModal')" data-bs-dismiss="modal" class="btn text-primary">Edit</button>
                 </div>
                 <div class="bg-light rounded p-2">
                     <div class="mb-2 text-center">
@@ -162,7 +162,7 @@
             <div>
                 <div class="d-flex align-items-center justify-content-between">
                     <h6 class="fs-5">Personal Info</h6>
-                    <button wire:click='openPersonalinfoEditModal()' class="btn text-primary">Edit</button>
+                    <button wire:click.prevent="$dispatch('openPersonalinfoEditModal')" class="btn text-primary">Edit</button>
                 </div>
                 <div class="bg-light rounded p-2">
                     <div>Username : {{$this->user->username}}</div>
@@ -184,7 +184,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="profileModalLabel">Edit Profile Info</h1>
-          <button wire:click='closeProfileEditModal()' type="button" class="btn-close"></button>
+          <button wire:click.prevent="$dispatch('closeProfileEditModal')" type="button" class="btn-close"></button>
         </div>
         <div class="modal-body">
             <h6 class="py-2">Profile</h6>
@@ -245,7 +245,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5">Edit Persoanal Info</h1>
-          <button wire:click='closePersonalinfoEditModal()' type="button" class="btn-close"></button>
+          <button wire:click.prevent="$dispatch('closePersonalinfoEditModal')" type="button" class="btn-close"></button>
         </div>
         <div class="modal-body">
             <form wire:submit.prevent='personalnfoUpdate()'>
@@ -278,9 +278,6 @@
       </div>
     </div>
   </div>
-  
-
-
 
   <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -294,7 +291,7 @@
           Livewire.on('openPersonalinfoEditModal',function() {  
             $('#personalInfoModal').modal('show');
         });
-          Livewire.on('closePersonalInfoModal',function() {  
+          Livewire.on('closePersonalinfoEditModal',function() {  
             $('#personalInfoModal').modal('hide');
             $('.modal-backdrop').remove();
         });

@@ -24,13 +24,13 @@ class Profile extends Component
     public $name;
     public $email;
     public $user;
+    public $savedPosts = [];
 
-    public function mount($username) {
+    public function mount($username) 
+    {
         $this->username = $username;
-        $this->user = User::with('profile')->where('username',$this->username)->first();
-        if(!$this->user) {
-            abort(404);
-        }
+        $this->user = User::with('profile','posts')->where('username', $this->username)->firstOrFail();
+        
         $this->image = $this->user->profile->image;
         $this->name = $this->user->name;
         $this->email = $this->user->email;
@@ -41,7 +41,16 @@ class Profile extends Component
         $this->facebook = $this->user->profile->facebook;
         $this->github = $this->user->profile->github;
         $this->linkedin = $this->user->profile->linkedin;
+        $this->loadSavedPosts();
     }
+
+    
+    private function loadSavedPosts()
+    {
+        $user = request()->user();
+        $this->savedPosts = $user->savedPosts()->pluck('post_id')->toArray();
+    }
+
     protected $rules = [
         'username' => 'required',
         'name' => 'required',
@@ -57,14 +66,28 @@ class Profile extends Component
         $this->closePersonalinfoEditModal();
     }
 
-    public function profileUpdate() {
-        if($this->newImage) {
-            if($this->user->profile->image && file_exists(public_path('storage'.$this->user->profile->image))) {
-                unlink(public_path('storage/'.$this->user->profile->image));
+    public function profileUpdate()
+    {
+        $this->validate([
+            'bio' => 'nullable|string',
+            'address' => 'nullable|string',
+            'work_at' => 'nullable|string',
+            'birthdate' => 'nullable|date',
+            'facebook' => 'nullable|url',
+            'github' => 'nullable|url',
+            'linkedin' => 'nullable|url',
+            'newImage' => 'nullable|image|max:1024',
+        ]);
+    
+        if ($this->newImage) {
+            if ($this->user->profile->image && file_exists(public_path('storage/' . $this->user->profile->image))) {
+                unlink(public_path('storage/' . $this->user->profile->image));
             }
-            $path = 'img_'.$this->username.'.'.'jpg';
-            $this->image = $this->newImage->storeAs('profiles',$path,'public');
+    
+            $path = 'profiles/img_' . $this->username . '.jpg';
+            $this->image = $this->newImage->storeAs('profiles', $path, 'public');
         }
+    
         $this->user->profile->update([
             'image' => $this->image,
             'bio' => $this->bio,
@@ -75,86 +98,49 @@ class Profile extends Component
             'github' => $this->github,
             'linkedin' => $this->linkedin,
         ]);
+    
         $this->closeProfileEditModal();
     }
-
-    public function savePost(Post $post) {
-        $userSavePost = $this->user->savedPosts()->where('post_id',$post->id)->first();
-        if($userSavePost) {
-            $userSavePost->delete();
-        }else {
-            request()->user()->savedPosts()->create(['post_id' => $post->id]);
+    
+    public function savePost($id)
+    {
+        if (in_array($id, $this->savedPosts)) {
+            $this->user->savedPosts()->where('post_id', $id)->delete();
+            $this->savedPosts = array_diff($this->savedPosts, [$id]);
+        } else {
+            $this->user->savedPosts()->create(['post_id' => $id]);
+            $this->savedPosts[] = $id;
         }
     }
 
-    public function saved(Post $post) :bool{
-        if(request()->user()->savedPosts()->where('post_id',$post->id)->exists()) {
-            return true;
-        }
-        return false;
+    public function saved(Post $post): bool
+    {
+        return $this->user->savedPosts()->where('post_id', $post->id)->exists();
     }
+    
+    public function likePost(Post $post) 
+    {
+        $like = $post->likes()->where('user_id', $this->user->id)->first();
 
-    public function likePost(Post $post) {
-        if(!$this->likedBy($post)) {
-            $post->likes()->create(['user_id' => $this->user->id]);
-        }else {
-            $like = $post->likes()->where('user_id',$this->user->id)->first();
+        if ($like) {
             $like->delete();
-        }
-    }
-
-    public function likedBy(Post $post) {
-        if($post->likes()->where('user_id',request()->user()->id)->exists()) {
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public function getFeeling($val) {
-        switch ($val) {
-            case 'happy':
-                return "is feeling happy😀";
-                break;
-
-            case 'sad':
-                return "is feeling sad😥";
-                break;
-
-            case 'angry':
-                return "is feeling angry😡";
-                break;
-
-            case 'thankfull':
-                return "is feeling thankfull🙏";
-                break;
-            case 'blessed':
-                return "is feeling blessed😊";
-                break;
-            case 'excited':
-                return "is feeling excited😉";
-                break;
-
-            default:
-                return null;
-                break;
+        } else {
+            $post->likes()->create(['user_id' => $this->user->id]);
         }
     }
 
 
+    public function likedBy(Post $post): bool
+    {
+        return $post->likes()->where('user_id', $this->user->id)->exists();
+    }
 
-    public function closeProfileEditModal() {
-        $this->dispatch('closeProfileEditModal');
+
+    public function showFeeling($val) 
+    {
+        return Post::getFeeling($val);
     }
-    public function openProfileEditModal() {
-        $this->dispatch('openProfileEditModal');
-    }
-    public function closePersonalinfoEditModal() {
-        $this->dispatch('closePersonalInfoModal');
-    }
-    public function openPersonalinfoEditModal() {
-        $this->dispatch('openPersonalinfoEditModal');
-    }
+    
 
     public function render()
     {

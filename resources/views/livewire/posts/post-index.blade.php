@@ -1,7 +1,7 @@
 <div>
     <div class="create_post row">
         <div class="d-flex align-items-center justify-content-center py-2">
-            <button wire:click='openPostModal()' id="cooking_btn" class="btn">
+            <button wire:click.prevent="$dispatch('openPostModal')" id="cooking_btn" class="btn">
               <div style="font-size: 60px">
                 <i class="fas fa-plus"></i>
               </div>
@@ -24,7 +24,7 @@
                   </a>
                   <div>
                     <h6><a class="author-name" href="{{route('profile.show',$post->user->username)}}" wire:navigate >{{$post->user->name}}</a> @if ($post->feeling)
-                      <span class="feeling-text">{{$this->getFeeling($post->feeling)}}</span>
+                      <span class="feeling-text">{{$this->showFeeling($post->feeling)}}</span>
                     @endif </h6>
                     <div class="text-secondary">{{$post->created_at->diffForHumans()}}</div>
                   </div>
@@ -37,7 +37,14 @@
                     </button>
                     <ul class="dropdown-menu">
                       <li><a href="{{route('post.show',[$post->user->username,$post->slug])}}" wire:navigate class="dropdown-item"><i class="fas fa-eye"></i> View Post</a></li>
-                      <li wire:click='savePost({{$post}})'><a class="dropdown-item {{$this->saved($post) ? 'text-primary' : null}}"><i class="fas fa-bookmark"></i> {{$this->saved($post) ? 'Unsave' : 'Save Post'}}</a></li>
+
+                      <li wire:click='savePost({{$post->id}})'>
+                        <a class="dropdown-item {{$this->saved($post) ? 'text-primary' : null}}">
+                          <i class="fas fa-bookmark"></i>
+                          {{$this->saved($post) ? 'Unsave' : 'Save Post'}}
+                        </a>
+                      </li>
+
                       <li onclick="copyLink({{json_encode(route('post.show',[$post->user->username,$post->slug]))}})"><a class="dropdown-item"><i class="fas fa-code"></i> Copy Link</a></li>
                     </ul>
                   </div>
@@ -77,7 +84,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="postModalLabel">Create a Post</h1>
-          <button type="button" class="btn-close" wire:click='closePostModal()'></button>
+          <button type="button" class="btn-close" wire:click.prevent="$dispatch('closePostModal'); $wire.resetData()"></button>
         </div>
         <form wire:submit='addPost()'>
           <div class="modal-body">
@@ -114,7 +121,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" wire:click='closePostModal()'>Close</button>
+            <button type="button" class="btn btn-secondary" wire:click.prevent="$dispatch('closePostModal'); $wire.resetData()">Close</button>
             <button type="submit" class="btn btn-primary">Add Post</button>
           </div>
         </form>

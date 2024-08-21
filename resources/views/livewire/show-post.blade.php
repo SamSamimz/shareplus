@@ -39,7 +39,7 @@
                 </a>
             </div>
           <div class="d-flex align-items-center justify-content-around pt-2">
-              <span style="text-decoration: underline" wire:click='allLikers()'> {{$post->likes->count(). ' ' . Str::plural('like',$post->likes->count())}}</span>
+              <span style="text-decoration: underline" wire:click.prevent="$dispatch('openModal')"> {{$post->likes->count(). ' ' . Str::plural('like',$post->likes->count())}}</span>
              
               <span> {{$post->comments->count(). ' ' . Str::plural('comment',$post->comments->count())}}</span>
              
@@ -114,7 +114,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="postModalLabel">People who likes</h1>
-          <button type="button" class="btn-close" wire:click='closeModal()'></button>
+          <button type="button" class="btn-close" wire:click.prevent="$dispatch('closeModal')"></button>
         </div>
           <div class="modal-body max-h-300">
             <div class="bg-light rounded">
@@ -132,8 +132,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" wire:click='closeModal()'>Close</button>
-            <button type="submit" class="btn btn-primary">Add Post</button>
+            <button type="button" class="btn btn-secondary" wire:click.prevent="$dispatch('closeModal')">Close</button>
           </div>
       </div>
     </div>

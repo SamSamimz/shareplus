@@ -27,6 +27,19 @@ class Post extends Model
         return $this->hasMany(Comment::class)->latestFirst();
     }
 
+    public static function getFeeling($val)
+    {
+        $feelings = [
+            'happy' => 'is feeling happy😀',
+            'sad' => 'is feeling sad😥',
+            'angry' => 'is feeling angry😡',
+            'thankfull' => 'is feeling thankfull🙏',
+            'blessed' => 'is feeling blessed😊',
+            'excited' => 'is feeling excited😉',
+        ];
+
+        return $feelings[$val] ?? null;
+    }
 
     public function sluggable(): array
     {

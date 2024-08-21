@@ -12,7 +12,7 @@ class ShowPost extends Component
     public $text;
 
     public function mount($slug) {
-        $this->post = Post::where('slug', $slug)->first();
+        $this->post = Post::with('likes','comments')->where('slug', $slug)->first();
     }
 
     // protected $rules = [
@@ -24,16 +24,6 @@ class ShowPost extends Component
             'text' => $this->text,
         ]);
         $this->reset('text');
-    }
-
-
-
-    public function allLikers() {
-        $this->dispatch('openModal');
-    }
-
-    public function closeModal() {
-        $this->dispatch('closeModal');
     }
 
     

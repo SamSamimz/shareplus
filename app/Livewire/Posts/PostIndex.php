@@ -16,17 +16,29 @@ class PostIndex extends Component
     public $caption;
     public $image;
     public $feeling;
+    public $savedPosts = [];
 
     public function mount() {
         $this->user = auth()->user();
+        $this->loadSavedPosts();
+
     }
+
+    private function loadSavedPosts()
+    {
+        $user = request()->user();
+        $this->savedPosts = $user->savedPosts()->pluck('post_id')->toArray();
+    }
+
 
     protected $rules = [
         'caption' => 'required|string|min:3|max:50',
         'image' => 'nullable|image|max:2048',
         'feeling' => 'nullable|in:sad,angry,happy,thankfull,blessed,excited',
     ];
-    public function addPost() {
+
+    public function addPost() 
+    {
         $this->validate();
         if($this->image) {
             $path = $this->user->username.time().'.'.$this->image->getClientOriginalExtension();
@@ -42,28 +54,33 @@ class PostIndex extends Component
         $this->mount();
     }
 
-    public function savePost(Post $post) {
-        $userSavePost = request()->user()->savedPosts()->where('post_id',$post->id)->first();
-        if($userSavePost) {
-            $userSavePost->delete();
-        }else {
-            request()->user()->savedPosts()->create(['post_id' => $post->id]);
+    public function savePost($id)
+    {
+        if (in_array($id, $this->savedPosts)) {
+            $this->user->savedPosts()->where('post_id', $id)->delete();
+            $this->savedPosts = array_diff($this->savedPosts, [$id]);
+        } else {
+            $this->user->savedPosts()->create(['post_id' => $id]);
+            $this->savedPosts[] = $id;
         }
     }
 
-    public function saved(Post $post) :bool{
-        if(request()->user()->savedPosts()->where('post_id',$post->id)->exists()) {
-            return true;
-        }
-        return false;
+    public function saved(Post $post): bool
+    {
+        $user = request()->user();
+        $savedPosts = $user->savedPosts->pluck('post_id')->toArray();
+        return in_array($post->id, $savedPosts);
     }
+    
 
-    public function likePost(Post $post) {
-        if(!$this->likedBy($post)) {
-            $post->likes()->create(['user_id' => request()->user()->id]);
-        }else {
-            $like = $post->likes()->where('user_id',request()->user()->id)->first();
-            $like->delete();
+    public function likePost(Post $post)
+    {
+        $existingLike = $post->likes()->where('user_id', $this->user->id)->first();
+
+        if ($existingLike) {
+            $existingLike->delete();
+        } else {
+            $post->likes()->create(['user_id' => $this->user->id]);
         }
     }
 
@@ -74,44 +91,15 @@ class PostIndex extends Component
             return false;
         }
     }
-
-    public function openPostModal() {
-        $this->dispatch('openPostModal');
-    }
-
-    public function closePostModal() {
+    
+    public function resetData() 
+    {
         $this->reset();
-        $this->dispatch('closePostModal');
     }
 
-    public function getFeeling($val) {
-        switch ($val) {
-            case 'happy':
-                return "is feeling happy😀";
-                break;
-
-            case 'sad':
-                return "is feeling sad😥";
-                break;
-
-            case 'angry':
-                return "is feeling angry😡";
-                break;
-
-            case 'thankfull':
-                return "is feeling thankfull🙏";
-                break;
-            case 'blessed':
-                return "is feeling blessed😊";
-                break;
-            case 'excited':
-                return "is feeling excited😉";
-                break;
-
-            default:
-                return null;
-                break;
-        }
+    public function showFeeling($val) 
+    {
+        return Post::getFeeling($val);
     }
 
     #[Computed]
