@@ -10,7 +10,7 @@
             </a>
             <div>
               <h6><a class="author-name" href="{{route('profile.show',$post->user->username)}}" wire:navigate >{{$post->user->name}}</a> @if ($post->feeling)
-                <span class="feeling-text">{{$this->getFeeling($post->feeling)}}</span>
+                <span class="feeling-text">{{$this->showFeeling($post->feeling)}}</span>
               @endif </h6>
               <div class="text-secondary">{{$post->created_at->diffForHumans()}}</div>
             </div>

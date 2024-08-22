@@ -14,15 +14,17 @@ class ShowPost extends Component
     public $text;
     public $user;
 
-    public function mount($slug) {
-        $this->post = Post::with('likes','comments')->where('slug', $slug)->first();
-        $this->user = request()->user();
+    public function mount($slug) 
+    {
+        $this->post = Post::with('user','likes','comments.user')->where('slug', $slug)->first();
+        $this->user = auth()->user();
     }
 
     // protected $rules = [
     //     'text' => 'requird','max:50'
     // ];
-    public function addComment() {
+    public function addComment() 
+    {
         $this->post->comments()->create([
             'user_id' => request()->user()->id,
             'text' => $this->text,
@@ -37,7 +39,8 @@ class ShowPost extends Component
 
     }
     
-    public function savePost(Post $post) {
+    public function savePost(Post $post) 
+    {
         if($this->userSavePost) {
             $this->userSavePost->delete();
         }else {
@@ -53,21 +56,21 @@ class ShowPost extends Component
         return false;
     }
 
-    public function likePost(Post $post) {
-        if(!$this->likedBy($post)) {
+    public function likePost(Post $post) 
+    {
+        if(!$this->likedBy) {
             $post->likes()->create(['user_id' => request()->user()->id]);
         }else {
             $like = $post->likes()->where('user_id',request()->user()->id)->first();
             $like->delete();
         }
+        unset($this->likedBy);
     }
 
-    public function likedBy(Post $post) {
-        if($post->likes()->where('user_id',request()->user()->id)->exists()) {
-            return true;
-        }else{
-            return false;
-        }
+    #[Computed]
+    public function likedBy()
+    {
+        return $this->post->likes()->where('user_id',$this->user->id)->exists();
     }
 
     public function postAuthor(Post $post) :bool{
@@ -78,7 +81,8 @@ class ShowPost extends Component
         }
     }
 
-    public function commentAuthor(Comment $comment) :bool{
+    public function commentAuthor(Comment $comment) :bool
+    {
         if($comment->user->id == auth()->user()->id) {
             return true;
         }else {
@@ -86,39 +90,15 @@ class ShowPost extends Component
         }
     }
 
-    public function deleteComment(Comment $comment) {
+    public function deleteComment(Comment $comment) 
+    {
         $comment->delete();
     }
 
 
-    public function getFeeling($val) {
-        switch ($val) {
-            case 'happy':
-                return "is feeling happy😀";
-                break;
-            
-            case 'sad':
-                return "is feeling sad😥";
-                break;
-            
-            case 'angry':
-                return "is feeling angry😡";
-                break;
-            
-            case 'thankfull':
-                return "is feeling thankfull🙏";
-                break;
-            case 'blessed':
-                return "is feeling blessed😊";
-                break;
-            case 'excited':
-                return "is feeling excited😉";
-                break;
-            
-            default:
-                return null;
-                break;
-        }
+    public function showFeeling($val) 
+    {
+        return Post::getFeeling($val);
     }
 
     public function render()
