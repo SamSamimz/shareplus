@@ -4,15 +4,19 @@ namespace App\Livewire;
 
 use App\Models\Comment;
 use App\Models\Post;
+use App\Models\SavedPost;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 class ShowPost extends Component
 {
     public $post;
     public $text;
+    public $user;
 
     public function mount($slug) {
         $this->post = Post::with('likes','comments')->where('slug', $slug)->first();
+        $this->user = request()->user();
     }
 
     // protected $rules = [
@@ -26,14 +30,20 @@ class ShowPost extends Component
         $this->reset('text');
     }
 
+    #[Computed]
+    public function userSavePost()
+    {
+        return SavedPost::where('user_id', $this->user->id)->first();
+
+    }
     
     public function savePost(Post $post) {
-        $userSavePost = request()->user()->savedPosts()->where('post_id',$post->id)->first();
-        if($userSavePost) {
-            $userSavePost->delete();
+        if($this->userSavePost) {
+            $this->userSavePost->delete();
         }else {
             request()->user()->savedPosts()->create(['post_id' => $post->id]);
         }
+        unset($this->userSavePost);
     }
 
     public function saved(Post $post) :bool{

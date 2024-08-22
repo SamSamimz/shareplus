@@ -11,13 +11,16 @@ class Comment extends Model
     use HasFactory;
     protected $guarded = [];
 
-    public function user() :BelongsTo {
+    public function user() :BelongsTo 
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function post() :BelongsTo {
+    public function post() :BelongsTo 
+    {
         return $this->belongsTo(Post::class);
     }
+
     public function scopeLatestFirst($query)
     {
         return $query->orderBy('created_at', 'desc');
