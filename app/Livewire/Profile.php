@@ -64,7 +64,8 @@ class Profile extends Component
             'name' => $this->name,
             'email' => $this->email,
         ]);
-        $this->closePersonalinfoEditModal();
+        $this->dispatch('closeProfileEditModal');
+        $this->dispatch('closePersonalinfoEditModal');
     }
 
     public function profileUpdate()
@@ -100,7 +101,9 @@ class Profile extends Component
             'linkedin' => $this->linkedin,
         ]);
     
-        $this->closeProfileEditModal();
+        $this->dispatch('closeProfileEditModal');
+        $this->dispatch('closePersonalinfoEditModal');
+        
     }
     
     public function savePost($id)

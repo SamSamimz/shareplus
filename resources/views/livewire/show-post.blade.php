@@ -85,7 +85,6 @@
                   <a class="text-black fw-bold" href="{{route('profile.show',$comment->user->username)}}" wire:navigate>{{$comment->user->name}}</a>
                   <div>{{$comment->text}}</div>
                 </div>
-                {{-- <div> --}}
                   @if ($this->postAuthor($post) || $this->commentAuthor($comment))
                   <div class="dropdown">
                     <button class="btn" data-bs-toggle="dropdown" aria-expanded="false">
@@ -99,7 +98,6 @@
                     </ul>
                   </div>
                   @endif
-                {{-- </div> --}}
                 </div>
             </div>
             @endforeach
