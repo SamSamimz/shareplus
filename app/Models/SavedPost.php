@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SavedPost extends Model
 {
+    protected $with = ['user','post'];
     use HasFactory;
     protected $guarded = [];
 

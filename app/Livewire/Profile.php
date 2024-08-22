@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Post;
+use App\Models\SavedPost;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -29,7 +30,7 @@ class Profile extends Component
     public function mount($username) 
     {
         $this->username = $username;
-        $this->user = User::with('profile','posts')->where('username', $this->username)->firstOrFail();
+        $this->user = User::with('profile','posts.likes','posts.comments')->where('username', $this->username)->firstOrFail();
         
         $this->image = $this->user->profile->image;
         $this->name = $this->user->name;
@@ -47,7 +48,7 @@ class Profile extends Component
     
     private function loadSavedPosts()
     {
-        $user = request()->user();
+        $user = auth()->user();
         $this->savedPosts = $user->savedPosts()->pluck('post_id')->toArray();
     }
 
@@ -115,7 +116,7 @@ class Profile extends Component
 
     public function saved(Post $post): bool
     {
-        return $this->user->savedPosts()->where('post_id', $post->id)->exists();
+        return SavedPost::with('user','post')->where('user_id',$this->user->id)->where('post_id', $post->id)->exists();
     }
     
     public function likePost(Post $post) 
